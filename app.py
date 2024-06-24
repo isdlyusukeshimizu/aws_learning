@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 # Flask SQLAlchemy については下記ページを参照
 # https://pypi.org/project/Flask-SQLAlchemy/
 # https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/
+#aaa
 
 from flask_migrate import Migrate
 # DB マイグレーション に使用する
