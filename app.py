@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 # DB 接続には flask_sqlalchemy を使用する
 # Flask SQLAlchemy については下記ページを参照
 # https://pypi.org/project/Flask-SQLAlchemy/
-
+# https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/
 
 from flask_migrate import Migrate
 # DB マイグレーション に使用する
