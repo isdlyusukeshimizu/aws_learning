@@ -6,9 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 # https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/
 
 from flask_migrate import Migrate
-# DB マイグレーション に使用する
-# 詳細は下記ページを参照
-# https://flask-migrate.readthedocs.io/en/latest/
+
 
 from flask import abort
 from flask import make_response
