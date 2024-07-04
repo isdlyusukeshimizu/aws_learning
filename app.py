@@ -41,9 +41,10 @@ def retrieve_stocks():                    # 送られたときのレスポンス
         
         # stocks テーブルの全てのデータをリストとして JSON 化してレスポンスとして返す
         # レスポンス ステータスを 200 に設定
-        return jsonify(
-            [stock.format() for stock in all_stocks]
-        ), 200
+        response_data = {}
+        for stock in all_stocks:
+            response_data.update(stock.format())
+        return jsonify(response_data), 200
 
 # URLパス: /v1/stocks/<name> に GET リクエストが送られたときのレスポンスを定義する
 # <name> の部分はパラメーター: name として関数中で使用できる
@@ -77,6 +78,9 @@ def add_stocks():
         
         # name の値チェック
         # ERROR となる場合は 400 エラーとする
+        # 下記の\は行継続文字と呼ばれます。
+        # この文字は、長いコード行を複数行に分割して書く際に使用され、
+        # 次の行が継続していることを示します。これにより、コードの可読性が向上します。
         if name is None or not isinstance(name, str) or\
            not name.isalpha() or len(name) > 8:
             abort(400)
@@ -227,7 +231,7 @@ def remove_stocks():
     # 空の JSON データを返す
     return jsonify(
         {}
-    ), 204
+    ), 200
 
 # ERROR 処理
 # エラーハンドラーについては下記ページなどを参照
@@ -266,3 +270,6 @@ class Sales(db.Model):
             # "sales"行のデータを小数点第2位までの表示にフォーマットする(四捨五入する)
             "sales": float("{:.2f}".format(self.sales)),
         }
+
+if __name__ == '__main__':
+     app.run(host="54.65.196.247", port=8080)
