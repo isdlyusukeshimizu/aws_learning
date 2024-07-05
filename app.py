@@ -1,58 +1,58 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-# DB 接続には flask_sqlalchemy を使用する
-# Flask SQLAlchemy については下記ページを参照
+# DB接続にはflask_sqlalchemyを使用する
+# Flask SQLAlchemyについては下記ページを参照
 # https://pypi.org/project/Flask-SQLAlchemy/
 # https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/
 
 from flask_migrate import Migrate
-# DB マイグレーション に使用する
+# DBマイグレーションに使用する
 # 詳細は下記ページを参照
 # https://flask-migrate.readthedocs.io/en/latest/
 
 from flask import abort
 from flask import make_response
 
-# Flask application インスタンスの作成
+# Flask applicationインスタンスの作成
 app = Flask(__name__)
 
-# 使用するDB の指定 (SQLite で data.db ファイルを使用する) 
+# 使用するDBの指定 (SQLiteでdata.dbファイルを使用する) 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 
-# SQLAlchemy インスタンスの作成
+# SQLAlchemyインスタンスの作成
 db = SQLAlchemy(app)
 
-# Flask-Migrate を使用するため Migrate インスタンスを作成
+# Flask-Migrateを使用するためMigrateインスタンスを作成
 migrate = Migrate(app, db)
 
-# -------- API のエンドポイントを定義 ------------------------------
-# route() については下記ページなどを参照
+# ----------------API のエンドポイントを定義----------------
+# route()については下記ページなどを参照
 # https://flask.palletsprojects.com/en/3.0.x/quickstart/#routing
 
 # それぞれのURLについて、HTTPリクエストを受け取ったときの
 # HTTPレスポンスを返す関数を定義する
 
 # 在庫チェック
-@app.route("/v1/stocks", methods=['GET']) # URLパス: /v1/stocks に GET リクエストが
+@app.route("/v1/stocks", methods=['GET']) # URLパス: /v1/stocksにGETリクエストが
 def retrieve_stocks():                    # 送られたときのレスポンスを定義する
     if request.method == 'GET':
-        # name をキーにして昇順ソートする
+        # nameをキーにして昇順ソートする
         all_stocks = Stock.query.order_by(Stock.name).all()
         
-        # stocks テーブルの全てのデータをリストとして JSON 化してレスポンスとして返す
-        # レスポンス ステータスを 200 に設定
+        # stocksテーブルの全てのデータをリストとしてJSON化してレスポンスとして返す
+        # レスポンス ステータスを200に設定
         response_data = {}
         for stock in all_stocks:
             response_data.update(stock.format())
         return jsonify(response_data), 200
 
-# URLパス: /v1/stocks/<name> に GET リクエストが送られたときのレスポンスを定義する
-# <name> の部分はパラメーター: name として関数中で使用できる
+# URLパス: /v1/stocks/<name>にGETリクエストが送られたときのレスポンスを定義する
+# <name> の部分はパラメーター: nameとして関数中で使用できる
 @app.route("/v1/stocks/<string:name>", methods=['GET'])                                                         
 def retrieve_stock(name):                           
     if request.method == 'GET':
         
-        # URL の <name> 部分で指定した名前の商品を stocks テーブルから探す
+        # URLの<name>部分で指定した名前の商品をstocksテーブルから探す
         stock = Stock.query.filter_by(name=name).first()
         if stock:
             # 在庫がある場合
@@ -62,7 +62,7 @@ def retrieve_stock(name):
             ), 200
         else:
             # 在庫がない場合
-            # amount を 0 としてJSONレスポンスを返す
+            # amountを0としてJSONレスポンスを返す
             return jsonify(
                 {name: 0}
             ), 200
@@ -72,47 +72,41 @@ def retrieve_stock(name):
 def add_stocks():
     if request.method == 'POST':
         
-        # リクエストボディから name と amount の値を取得する
+        # リクエストボディからnameとamountの値を取得する
         name = request.get_json().get('name')
         amount = request.get_json().get('amount')
         
-        # name の値チェック
-        # ERROR となる場合は 400 エラーとする
-        # 下記の\は行継続文字と呼ばれます。
-        # この文字は、長いコード行を複数行に分割して書く際に使用され、
-        # 次の行が継続していることを示します。これにより、コードの可読性が向上します。
+        # nameの値チェック
+        # ERRORとなる場合は400エラーとする
         if name is None or not isinstance(name, str) or\
            not name.isalpha() or len(name) > 8:
             abort(400)
         
-        # 上にあるので不要
-        # amount = request.get_json().get('amount')
-        
-        # amount の値チェック
-        # amount が リクエストボディに含まれない場合 amount = 1 とする
+        # amountの値チェック
+        # amountがリクエストボディに含まれない場合amount = 1とする
         if amount is None:
             amount = 1
-        # ERROR となる場合 400 エラーとする
+        # ERRORとなる場合400エラーとする
         if not isinstance(amount, int) or not amount > 0:
             abort(400)
             
-        # 指定した名前の商品を stocks テーブルから探す
+        # 指定した名前の商品をstocksテーブルから探す
         stock = Stock.query.filter_by(name=name).first()
         if stock:
             # 存在する場合更新する
-            # amount をプラスする
+            # amountをプラスする
             stock.amount += amount
 
         else:
             # 存在しない場合作成する
-            # 指定した amount でテーブルにデータを追加する
+            # 指定したamountでテーブルにデータを追加する
             stock = Stock(name=name, amount=amount)
             db.session.add(stock)
         # DBテーブルの更新を実行
         db.session.commit()
         
-        # response インスタンスをつくる
-        # リクエストボディの JSON と同じデータに設定する
+        # responseインスタンスをつくる
+        # リクエストボディのJSONと同じデータに設定する
         response = make_response(
             request.get_json()
         )
@@ -125,33 +119,33 @@ def add_stocks():
 @app.route("/v1/sales", methods=['POST'])
 def sale_stocks():
     
-    # リクエストボディから name, amount, price のデータを取得
+    # リクエストボディからname, amount, priceのデータを取得
     name = request.get_json().get('name')
     amount = request.get_json().get('amount')
     price = request.get_json().get('price')
     
-    # amount が指定されていない場合は 1 に設定する
+    # amountが指定されていない場合は1に設定する
     if amount is None:
         amount = 1
     
-    # name の値の条件チェック
+    # nameの値の条件チェック
     # 商品名は8文字以内であること、アルファベット小文字または大文字のみを含むこと
     if name is None or not isinstance(name, str) or\
     not name.isalpha() or len(name) > 8:
         abort(400)
     
-    # amount の値の条件チェック
+    # amountの値の条件チェック
     # 整数であること、0より大きいこと
     if not isinstance(amount, int) or not amount > 0:
         abort(400)
     
     # 指定商品の在庫があるかどうかチェック
-    # 在庫数が不足の場合 400 エラー
+    # 在庫数が不足の場合400エラー
     stock = Stock.query.filter_by(name=name).first()
     if stock is None or stock.amount < amount:
         abort(400)
 
-    # price が指定されていない場合
+    # priceが指定されていない場合
     if price is None:
         # 販売分だけ在庫を減らす    
         stock.amount -= amount
@@ -167,8 +161,8 @@ def sale_stocks():
     else:
         price = float(price)
         
-    # price の値の条件チェック
-    # float タイプであること、0より大きいこと
+    # priceの値の条件チェック
+    # floatタイプであること、0より大きいこと
     if not isinstance(price, float) or not price > 0:
         abort(400)
         
@@ -176,7 +170,7 @@ def sale_stocks():
     stock.amount -= amount
     db.session.commit()
     
-    # sales テーブルの "sales" データの取得
+    # salesテーブルの"sales"データの取得
     sales = Sales.query.filter_by(name="sales").first()
     
     # データがない場合はテーブルに追加する
@@ -185,7 +179,7 @@ def sale_stocks():
         db.session.add(sales)
         db.session.commit()
     
-    # 売上に 販売価格 x 数量 を加算
+    # 売上に販売価格 x 数量 を加算
     #sales.sales += Decimal(price * amount)
     sales.sales += price * amount
     db.session.commit()
@@ -203,7 +197,7 @@ def sale_stocks():
 @app.route("/v1/sales", methods=['GET'])
 def check_stocks():
     
-    # sales テーブルの name="sales"行データを取得
+    # salesテーブルのname="sales"行データを取得
     sales = Sales.query.filter_by(name="sales").first()
     
     # データがない場合は"sales"行データを作成する
@@ -242,9 +236,9 @@ def bad_request(error):
     return jsonify({
         'message': "ERROR"
     }), 400
-# --------------------------------------
-# DBモデルの定義
-# stocks テーブルと sales テーブルを定義する
+
+# ----------------DBモデルの定義----------------
+# stocksテーブルとsalesテーブルを定義する
 # テーブル含まれるカラムのタイプなどを指定する
 
 # モデル定義については下記ページなど参照
@@ -272,4 +266,4 @@ class Sales(db.Model):
         }
 
 if __name__ == '__main__':
-     app.run(host="54.65.196.247", port=8080)
+     app.run(host="54.65.196.247", port=80)
