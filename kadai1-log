@@ -1,0 +1,33 @@
+●概要
+Webサーバーとして、Apacheをインストールしました。
+理由としては、クロスプラットフォームな環境での使用が可能であり、
+長年の使用実績によりトラブルシューティングにおける豊富なドキュメントが存在していると考えたからです。
+
+------------------------------
+
+下記に本課題における、コマンド操作と説明を記載いたします。
+
+①Webサーバーのインストール
+sudo yum update -y
+sudo yum install -y httpd
+
+②Webサーバーの起動と自動起動の設定
+sudo systemctl start httpd
+sudo systemctl enable httpd
+
+③apacheのドキュメントルートである/var/www/html/index.htmlを編集
+echo "AWS" | sudo tee /var/www/html/index.html
+
+④確認
+> インストールされた Web サーバーが正しく起動することを確認しましたか？
+sudo systemctl status httpd
+Active: active (running)となっているため、Webサーバーが正常起動しています。
+
+> Web サーバーの自動起動が正しく設定されていることを確認しましたか？
+sudo reboot
+sudo systemctl status httpd
+リブートしても、Active: active (running)となっているため、Webサーバーが正常起動しています。
+
+> 実行例の curl コマンドを使用して、同じ結果が得られることを確認しましたか？
+curl http://54.65.196.247
+AWS
