@@ -1,6 +1,6 @@
 from app import create_app
 
-# create_app関数を呼び出してFlaskアプリケーションインスタンスを作成
+# create_app関数を呼び出してFlaskアプリケーションインスタンスを作成する
 app = create_app()
 
 if __name__ == '__main__':
